@@ -16,18 +16,15 @@ const dirIndex = args.indexOf('--dir');
 const projectDir = dirIndex !== -1 ? path.resolve(args[dirIndex + 1]) : path.resolve('.');
 const portIndex = args.indexOf('--port');
 const port = portIndex !== -1 ? parseInt(args[portIndex + 1], 10) : 3000;
+const hostIndex = args.indexOf('--host');
+const host = hostIndex !== -1 ? args[hostIndex + 1] : '127.0.0.1';
 
 const app = Fastify({ logger: true });
 
 async function start() {
   // Plugins
   await app.register(fastifyCors, {
-    origin: [
-      `http://127.0.0.1:${port}`,
-      `http://localhost:${port}`,
-      'http://127.0.0.1:5173',
-      'http://localhost:5173',
-    ],
+    origin: true,
   });
   await app.register(fastifyMultipart, { limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -65,8 +62,8 @@ async function start() {
   registerAssetRoutes(app, projectDir);
   registerExportRoutes(app, port);
 
-  await app.listen({ port, host: '127.0.0.1' });
-  console.log(`\nPageSmith running at http://127.0.0.1:${port}`);
+  await app.listen({ port, host });
+  console.log(`\nPageSmith running at http://${host}:${port}`);
   console.log(`Project directory: ${projectDir}\n`);
 
   // Auto-open browser (skip in test and dev mode where Vite serves the frontend)
